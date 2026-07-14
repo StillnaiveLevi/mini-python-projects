@@ -3,28 +3,148 @@
 <head>
     <meta charset="UTF-8">
     <title>{{ test_name }} Results</title>
+    <style>
+        * { font-family: Arial, sans-serif; }
+        h1 { color: #2c3e50; }
+
+        /* Summary cards */
+        .stats {
+            display: flex;
+            gap: 16px;
+            margin-bottom: 20px;
+        }
+        .stat-card {
+            background: #f0f4f8;
+            border-radius: 8px;
+            padding: 12px 20px;
+            min-width: 100px;
+        }
+        .stat-label { font-size: 0.85em; color: #666; }
+        .stat-value { font-size: 1.4em; font-weight: bold; color: #2c3e50; }
+
+        /* Table */
+        table {
+            border-collapse: collapse;
+            width: 100%;
+            max-width: 600px;
+        }
+        th {
+            background: #2c3e50;
+            color: white;
+            padding: 10px 14px;
+            text-align: left;
+        }
+        td {
+            padding: 9px 14px;
+            border-bottom: 1px solid #ddd;
+        }
+        tr:hover { background: #f9f9f9; }
+
+        /* Grade pills */
+        .grade {
+            display: inline-block;
+            padding: 3px 10px;
+            border-radius: 12px;
+            font-weight: bold;
+            font-size: 0.9em;
+        }
+        .grade-A { background: #27ae60; color: white; }   /* green  */
+        .grade-B { background: #2980b9; color: white; }  /* blue   */
+        .grade-C { background: #f39c12; color: white; }   /* orange */
+        .grade-D { background: #e67e22; color: white; }  /* dark orange */
+        .grade-F { background: #c0392b; color: white; } /* red    */
+
+        .pass-rate-bar {
+            margin-top: 20px;
+            max-width: 400px;
+        }
+        .bar-label { font-weight: bold; margin-bottom: 4px; }
+        .bar-track {
+            background: #eee;
+            border-radius: 8px;
+            height: 20px;
+            overflow: hidden;
+        }
+        .bar-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #27ae60, #2ecc71);
+            border-radius: 8px;
+        }
+    </style>
 </head>
 <body>
     <h1>{{ test_name }} Results</h1>
-    <p>Maximum score: {{ max_score }}</p>
-    <table border="1" cellpadding="8" cellspacing="0">
+
+    {# ── Summary Stats ─────────────────────────────────────── #}
+    <div class="stats">
+        <div class="stat-card">
+            <div class="stat-label">Average</div>
+            <div class="stat-value">{{ "%.1f"|format(avg_score) }}</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-label">Highest</div>
+            <div class="stat-value">{{ high_score }}</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-label">Lowest</div>
+            <div class="stat-value">{{ low_score }}</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-label">Total</div>
+            <div class="stat-value">{{ students|length }}</div>
+        </div>
+    </div>
+
+    <div class="pass-rate-bar">
+        <div class="bar-label">Pass Rate: {{ pass_rate }}%</div>
+        <div class="bar-track">
+            <div class="bar-fill" style="width: {{ pass_rate }}%"></div>
+        </div>
+    </div>
+
+    {# ── Student Table ──────────────────────────────────────── #}
+    <table>
         <thead>
             <tr>
+                <th>#</th>
                 <th>Name</th>
                 <th>Score</th>
                 <th>Percentage</th>
                 <th>Grade</th>
+                <th>Status</th>
             </tr>
         </thead>
         <tbody>
-            {% for student in students %}
+        {% for student in students %}
+            {% set percentage = (student.score / max_score * 100) | round(2) %}
+
+            {# Grade assignment via Jinja conditionals #}
+            {% if percentage >= 90 %}
+                {% set grade = "A" %}
+                {% set grade_class = "grade-A" %}
+            {% elif percentage >= 80 %}
+                {% set grade = "B" %}
+                {% set grade_class = "grade-B" %}
+            {% elif percentage >= 70 %}
+                {% set grade = "C" %}
+                {% set grade_class = "grade-C" %}
+            {% elif percentage >= 60 %}
+                {% set grade = "D" %}
+                {% set grade_class = "grade-D" %}
+            {% else %}
+                {% set grade = "F" %}
+                {% set grade_class = "grade-F" %}
+            {% endif %}
+
             <tr>
+                <td>{{ loop.index }}</td>
                 <td>{{ student.name }}</td>
-                <td>{{ student.score }}</td>
-                <td>{{ '%.2f' % student.percentage }}%</td>
-                <td>{{ student.grade }}</td>
+                <td>{{ student.score }} / {{ max_score }}</td>
+                <td>{{ '%.2f'|format(percentage) }}%</td>
+                <td><span class="grade {{ grade_class }}">{{ grade }}</span></td>
+                <td>{{ "✅ Pass" if percentage >= 60 else "❌ Fail" }}</td>
             </tr>
-            {% endfor %}
+        {% endfor %}
         </tbody>
     </table>
 </body>
