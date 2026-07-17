@@ -1,4 +1,8 @@
+from pathlib import Path
+
 from jinja2 import Environment, FileSystemLoader
+
+BASE_DIR = Path(__file__).resolve().parent
 
 max_score = 100
 test_name = "Python Test"
@@ -12,16 +16,16 @@ students = [
     {"name": "Diana Ross",  "score": 88},
 ]
 
-env = Environment(loader=FileSystemLoader('templates'))
-template = env.get_template('test_template.html')
+env = Environment(loader=FileSystemLoader(BASE_DIR / "templates"))
+template = env.get_template("test_template.html")
 
 # Summary stats computed in Python (template-friendly)
 scores = [s["score"] for s in students]
-avg_score   = sum(scores) / len(scores)
-high_score  = max(scores)
-low_score   = min(scores)
-pass_count  = sum(1 for s in scores if s >= 60)
-pass_rate   = round(pass_count / len(scores) * 100, 1)
+avg_score = sum(scores) / len(scores)
+high_score = max(scores)
+low_score = min(scores)
+pass_count = sum(1 for s in scores if s >= 60)
+pass_rate = round(pass_count / len(scores) * 100, 1)
 
 output = template.render(
     students=students,
@@ -31,6 +35,7 @@ output = template.render(
     high_score=high_score,
     low_score=low_score,
     pass_rate=pass_rate,
+    form_action="/add",
 )
-with open('output.html', 'w', encoding='utf-8') as f:
+with open(BASE_DIR / "output.html", "w", encoding="utf-8") as f:
     f.write(output)

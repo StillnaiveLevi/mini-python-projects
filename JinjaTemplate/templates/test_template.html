@@ -7,6 +7,37 @@
         * { font-family: Arial, sans-serif; }
         h1 { color: #2c3e50; }
 
+        /* Add-student form */
+        .add-form {
+            background: #f8f9fa;
+            border: 2px dashed #ccc;
+            border-radius: 8px;
+            padding: 16px 20px;
+            margin-bottom: 24px;
+            display: flex;
+            gap: 10px;
+            align-items: flex-end;
+            flex-wrap: wrap;
+        }
+        .add-form label { font-size: 0.85em; color: #555; font-weight: bold; }
+        .add-form input {
+            padding: 7px 10px;
+            border: 1px solid #bbb;
+            border-radius: 5px;
+            font-size: 0.95em;
+        }
+        .add-form button {
+            padding: 7px 18px;
+            background: #27ae60;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 0.95em;
+            font-weight: bold;
+        }
+        .add-form button:hover { background: #219150; }
+
         /* Summary cards */
         .stats {
             display: flex;
@@ -75,7 +106,20 @@
 <body>
     <h1>{{ test_name }} Results</h1>
 
-    {# ── Summary Stats ─────────────────────────────────────── #}
+    <!-- Add Student Form -->
+    <form class="add-form" action="{{ form_action }}" method="POST">
+        <div>
+            <label for="name">Name</label><br>
+            <input type="text" id="name" name="name" placeholder="e.g. Alex Kim" required>
+        </div>
+        <div>
+            <label for="score">Score (0–{{ max_score }})</label><br>
+            <input type="number" id="score" name="score" min="0" max="{{ max_score }}" placeholder="0–{{ max_score }}" required>
+        </div>
+        <button type="submit">Add Student</button>
+    </form>
+
+    <!-- Summary Stats -->
     <div class="stats">
         <div class="stat-card">
             <div class="stat-label">Average</div>
@@ -102,7 +146,7 @@
         </div>
     </div>
 
-    {# ── Student Table ──────────────────────────────────────── #}
+    <!-- Student Table -->
     <table>
         <thead>
             <tr>
@@ -118,7 +162,7 @@
         {% for student in students %}
             {% set percentage = (student.score / max_score * 100) | round(2) %}
 
-            {# Grade assignment via Jinja conditionals #}
+            <!-- Grade assignment via Jinja conditionals -->
             {% if percentage >= 90 %}
                 {% set grade = "A" %}
                 {% set grade_class = "grade-A" %}
@@ -142,7 +186,7 @@
                 <td>{{ student.score }} / {{ max_score }}</td>
                 <td>{{ '%.2f'|format(percentage) }}%</td>
                 <td><span class="grade {{ grade_class }}">{{ grade }}</span></td>
-                <td>{{ "✅ Pass" if percentage >= 60 else "❌ Fail" }}</td>
+                <td>{{ "Pass" if percentage >= 60 else "Fail" }}</td>
             </tr>
         {% endfor %}
         </tbody>
